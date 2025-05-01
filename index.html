@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tech.Care - Healthcare Dashboard</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/3.9.1/chart.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #00BFA6;
+      --secondary-color: #2A3342;
+      --light-gray: #F8F9FA;
+      --medium-gray: #E5E7EB;
+      --dark-gray: #6B7280;
+      --white: #FFFFFF;
+      --red: #FF6B6B;
+      --blue: #4E9BFF;
+      --purple: #7E57C2;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+
+    body {
+      background-color: var(--light-gray);
+      color: var(--secondary-color);
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1.5rem;
+      background-color: var(--white);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .logo img {
+      height: 2rem;
+    }
+
+    .logo-text {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--secondary-color);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--dark-gray);
+      text-decoration: none;
+      padding: 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    .nav-item.active {
+      color: var(--primary-color);
+      border-bottom: 2px solid var(--primary-color);
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .user-avatar {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      font-size: 0.75rem;
+    }
+
+    .user-name {
+      font-weight: 600;
+    }
+
+    .user-role {
+      color: var(--dark-gray);
+    }
+
+    /* Main Content */
+    .main-container {
+      display: flex;
+      height: calc(100vh - 4rem);
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 240px;
+      background-color: var(--white);
+      border-right: 1px solid var(--medium-gray);
+      overflow-y: auto;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      font-weight: 600;
+    }
+
+    .search-bar {
+      margin: 0 1rem 1rem;
+      position: relative;
+    }
+
+    .search-bar input {
+      width: 100%;
+      padding: 0.5rem 0.5rem 0.5rem 2rem;
+      border: 1px solid var(--medium-gray);
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--dark-gray);
+    }
+
+    .patient-list {
+      list-style: none;
+    }
+
+    .patient-item {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1.5rem;
+      border-bottom: 1px solid var(--medium-gray);
+      cursor: pointer;
+    }
+
+    .patient-item.active {
+      background-color: rgba(0, 191, 166, 0.1);
+      border-left: 3px solid var(--primary-color);
+    }
+
+    .patient-avatar {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 1rem;
+    }
+
+    .patient-info {
+      flex-grow: 1;
+    }
+
+    .patient-name {
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+
+    .patient-details {
+      font-size: 0.75rem;
+      color: var(--dark-gray);
+    }
+
+    .patient-actions {
+      color: var(--dark-gray);
+    }
+
+    /* Main Content */
+    .content {
+      flex-grow: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .left-panel {
+      flex: 2;
+    }
+
+    .right-panel {
+      flex: 1;
+      background-color: var(--white);
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .section {
+      background-color: var(--white);
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .section-header {
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    /* Diagnosis History */
+    .blood-pressure-chart {
+      margin-top: 1rem;
+      height: 200px;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .time-selector {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0.5rem;
+      border: 1px solid var(--medium-gray);
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+    }
+
+    .chart-legend {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      font-size: 0.75rem;
+      gap: 0.25rem;
+    }
+
+    .legend-color {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+    }
+
+    .legend-text {
+      color: var(--dark-gray);
+    }
+
+    .vital-signs {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .vital-sign {
+      flex: 1;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .respiratory-rate {
+      background-color: rgba(78, 155, 255, 0.1);
+    }
+
+    .temperature {
+      background-color: rgba(255, 107, 107, 0.1);
+    }
+
+    .heart-rate {
+      background-color: rgba(255, 107, 107, 0.1);
+    }
+
+    .vital-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .vital-title {
+      font-size: 0.75rem;
+      color: var(--dark-gray);
+      margin-bottom: 0.5rem;
+    }
+
+    .vital-value {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .vital-status {
+      font-size: 0.75rem;
+      color: var(--dark-gray);
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .status-indicator {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+    }
+
+    .normal {
+      background-color: var(--primary-color);
+    }
+
+    .lower-than-average {
+      background-color: #9C27B0;
+    }
+
+    .higher-than-average {
+      background-color: var(--red);
+    }
+
+    /* Diagnostic List */
+    .diagnostic-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    .diagnostic-table th {
+      text-align: left;
+      padding: 0.75rem;
+      color: var(--dark-gray);
+      font-weight: 500;
+      border-bottom: 1px solid var(--medium-gray);
+    }
+
+    .diagnostic-table td {
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--medium-gray);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 1rem;
+      font-size: 0.75rem;
+    }
+
+    .status-badge.active {
+      background-color: rgba(0, 191, 166, 0.1);
+      color: var(--primary-color);
+    }
+
+    .status-badge.under-observation {
+      background-color: rgba(255, 152, 0, 0.1);
+      color: #FF9800;
+    }
+
+    .status-badge.cured {
+      background-color: rgba(76, 175, 80, 0.1);
+      color: #4CAF50;
+    }
+
+    /* Patient Profile */
+    .patient-profile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    .patient-profile-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 1rem;
+    }
+
+    .patient-profile-name {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+
+    .patient-profile-info {
+      width: 100%;
+      margin-bottom: 2rem;
+    }
+
+    .info-item {
+      display: flex;
+      align-items: flex-start;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--medium-gray);
+    }
+
+    .info-icon {
+      width: 1.5rem;
+      margin-right: 0.75rem;
+      text-align: center;
+      color: var(--dark-gray);
+    }
+
+    .info-content {
+      flex-grow: 1;
+    }
+
+    .info-label {
+      font-size: 0.75rem;
+      color: var(--dark-gray);
+      margin-bottom: 0.25rem;
+    }
+
+    .info-value {
+      font-size: 0.875rem;
+    }
+
+    .show-all-btn {
+      background-color: var(--primary-color);
+      color: var(--white);
+      border: none;
+      border-radius: 0.25rem;
+      padding: 0.75rem 1.5rem;
+      font-weight: 500;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    /* Lab Results */
+    .lab-results {
+      width: 100%;
+    }
+
+    .lab-result-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--medium-gray);
+    }
+
+    .lab-result-name {
+      font-size: 0.875rem;
+    }
+
+    .download-btn {
+      color: var(--primary-color);
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .bp-value {
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .bp-status {
+      font-size: 0.75rem;
+      color: var(--dark-gray);
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+        <path d="M4 4H16V16H4V4Z" fill="#00BFA6"/>
+        <path d="M16 16H28V28H16V16Z" fill="#00BFA6"/>
+        <path d="M16 4H28V12H16V4Z" fill="#00BFA6" fill-opacity="0.6"/>
+        <path d="M4 16H12V28H4V16Z" fill="#00BFA6" fill-opacity="0.6"/>
+      </svg>
+      <span class="logo-text">Tech.Care</span>
+    </div>
+    <nav class="nav">
+      <a href="#" class="nav-item">
+        <i class="fas fa-home"></i>
+        <span>Overview</span>
+      </a>
+      <a href="#" class="nav-item active">
+        <i class="fas fa-user-friends"></i>
+        <span>Patients</span>
+      </a>
+      <a href="#" class="nav-item">
+        <i class="fas fa-calendar"></i>
+        <span>Schedule</span>
+      </a>
+      <a href="#" class="nav-item">
+        <i class="fas fa-comment"></i>
+        <span>Message</span>
+      </a>
+      <a href="#" class="nav-item">
+        <i class="fas fa-credit-card"></i>
+        <span>Transactions</span>
+      </a>
+    </nav>
+    <div class="user-profile">
+      <img src="/api/placeholder/40/40" alt="Doctor Avatar" class="user-avatar" id="doctor-avatar">
+      <div class="user-info">
+        <span class="user-name" id="doctor-name">Dr. Jose Simmons</span>
+        <span class="user-role">General Practitioner</span>
+      </div>
+      <i class="fas fa-cog"></i>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="main-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h2 class="sidebar-header">Patients</h2>
+      <div class="search-bar">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" placeholder="Search patients">
+      </div>
+      <ul class="patient-list" id="patient-list">
+        <!-- Patient list will be populated by JavaScript -->
+      </ul>
+    </aside>
+
+    <!-- Content -->
+    <main class="content">
+      <div class="left-panel">
+        <!-- Diagnosis History -->
+        <section class="section">
+          <h3 class="section-header">Diagnosis History</h3>
+          <div class="chart-header">
+            <div class="bp-values">
+              <div class="chart-legend">
+                <div class="legend-item">
+                  <div class="legend-color" style="background-color: #FF6B6B;"></div>
+                  <span>Systolic</span>
+                  <span class="bp-value" id="systolic-value">160</span>
+                  <span class="bp-status" id="systolic-status">
+                    <i class="fas fa-arrow-up" style="color: #FF6B6B;"></i>
+                    <span>Higher than Average</span>
+                  </span>
+                </div>
+                <div class="legend-item">
+                  <div class="legend-color" style="background-color: #4E9BFF;"></div>
+                  <span>Diastolic</span>
+                  <span class="bp-value" id="diastolic-value">78</span>
+                  <span class="bp-status" id="diastolic-status">
+                    <i class="fas fa-arrow-down" style="color: #4E9BFF;"></i>
+                    <span>Lower than Average</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="time-selector">
+              <span>Last 6 months</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+          </div>
+          <div class="blood-pressure-chart">
+            <canvas id="bp-chart"></canvas>
+          </div>
+          <div class="vital-signs">
+            <div class="vital-sign respiratory-rate">
+              <img src="/api/placeholder/40/40" alt="Lungs Icon" class="vital-icon" id="lungs-icon">
+              <span class="vital-title">Respiratory Rate</span>
+              <span class="vital-value" id="respiratory-rate">20 bpm</span>
+              <span class="vital-status">
+                <span class="status-indicator normal"></span>
+                <span>Normal</span>
+              </span>
+            </div>
+            <div class="vital-sign temperature">
+              <img src="/api/placeholder/40/40" alt="Temperature Icon" class="vital-icon" id="temperature-icon">
+              <span class="vital-title">Temperature</span>
+              <span class="vital-value" id="temperature">98.6°F</span>
+              <span class="vital-status">
+                <span class="status-indicator normal"></span>
+                <span>Normal</span>
+              </span>
+            </div>
+            <div class="vital-sign heart-rate">
+              <img src="/api/placeholder/40/40" alt="Heart Icon" class="vital-icon" id="heart-icon">
+              <span class="vital-title">Heart Rate</span>
+              <span class="vital-value" id="heart-rate">78 bpm</span>
+              <span class="vital-status">
+                <span class="status-indicator lower-than-average"></span>
+                <span>Lower Than Average</span>
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Diagnostic List -->
+        <section class="section">
+          <h3 class="section-header">Diagnostic List</h3>
+          <table class="diagnostic-table">
+            <thead>
+              <tr>
+                <th>Problem/Diagnosis</th>
+                <th>Description</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="diagnostic-list">
+              <!-- Diagnostic list will be populated by JavaScript -->
+            </tbody>
+          </table>
+        </section>
+      </div>
+
+      <div class="right-panel">
+        <div class="patient-profile">
+          <img src="/api/placeholder/120/120" alt="Patient Avatar" class="patient-profile-avatar" id="selected-patient-avatar">
+          <h2 class="patient-profile-name" id="selected-patient-name">Jessica Taylor</h2>
+          <div class="patient-profile-info">
+            <div class="info-item">
+              <div class="info-icon">
+                <i class="fas fa-calendar"></i>
+              </div>
+              <div class="info-content">
+                <div class="info-label">Date Of Birth</div>
+                <div class="info-value" id="patient-dob">August 22, 1995</div>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-icon">
+                <i class="fas fa-venus-mars"></i>
+              </div>
+              <div class="info-content">
+                <div class="info-label">Gender</div>
+                <div class="info-value" id="patient-gender">Female</div>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-icon">
+                <i class="fas fa-phone"></i>
+              </div>
+              <div class="info-content">
+                <div class="info-label">Contact Info</div>
+                <div class="info-value" id="patient-phone">(415) 555-1234</div>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-icon">
+                <i class="fas fa-phone-alt"></i>
+              </div>
+              <div class="info-content">
+                <div class="info-label">Emergency Contacts</div>
+                <div class="info-value" id="patient-emergency">(415) 555-5678</div>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-icon">
+                <i class="fas fa-shield-alt"></i>
+              </div>
+              <div class="info-content">
+                <div class="info-label">Insurance Provider</div>
+                <div class="info-value" id="patient-insurance">Sunrise Health Assurance</div>
+              </div>
+            </div>
+          </div>
+          <button class="show-all-btn">Show All Information</button>
+          
+          <h3 class="section-header" style="margin-top: 2rem; align-self: flex-start;">Lab Results</h3>
+          <div class="lab-results">
+            <div class="lab-result-item">
+              <span class="lab-result-name">Basic Tests</span>
+              <button class="download-btn">
+                <i class="fas fa-download"></i>
+              </button>
+            </div>
+            <div class="lab-result-item">
+              <span class="lab-result-name">CT Scans</span>
+              <button class="download-btn">
+                <i class="fas fa-download"></i>
+              </button>
+            </div>
+            <div class="lab-result-item">
+              <span class="lab-result-name">Radiology Reports</span>
+              <button class="download-btn">
+                <i class="fas fa-download"></i>
+              </button>
+            </div>
+            <div class="lab-result-item">
+              <span class="lab-result-name">X-Rays</span>
+              <button class="download-btn">
+                <i class="fas fa-download"></i>
+              </button>
+            </div>
+            <div class="lab-result-item">
+              <span class="lab-result-name">Urine Test</span>
+              <button class="download-btn">
+                <i class="fas fa-download"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Function to encode credentials for Basic Auth
+    function encodeCredentials(username, password) {
+      return btoa(`${username}:${password}`);
+    }
+
+    // Fetch patient data from API
+    async function fetchPatientData() {
+      try {
+        const username = 'coalition';
+        const password = 'skills-test';
+        const encodedCredentials = encodeCredentials(username, password);
+        
+        const response = await fetch('https://fedskillstest.coalitiontechnologies.workers.dev', {
+          headers: {
+            'Authorization': `Basic ${encodedCredentials}`
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error('Error fetching patient data:', error);
+        return null;
+      }
+    }
+
+    // Set icons for vital signs
+    function setVitalIcons() {
+      // Create SVG for lungs icon
+      const lungsIcon = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
+          <path d="M20,5 V30 M10,10 C5,12 5,20 7,25 C9,30 12,33 18,30 M30,10 C35,12 35,20 33,25 C31,30 28,33 22,30" stroke="#4E9BFF" fill="none" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      `;
+      
+      // Create SVG for temperature icon
+      const temperatureIcon = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
+          <path d="M20,5 V25 M15,30 A5,5 0 0 0 25,30 A5,5 0 0 0 15,30 M20,10 H25 M20,15 H25" stroke="#FF6B6B" fill="none" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      `;
+      
+      // Create SVG for heart icon
+      const heartIcon = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
+          <path d="M20,10 C18,5 10,5 10,12 C10,18 20,25 20,25 C20,25 30,18 30,12 C30,5 22,5 20,10 Z" stroke="#FF6B6B" fill="none" stroke-width="2" />
+        </svg>
+      `;
+      
+      document.getElementById('lungs-icon').outerHTML = lungsIcon;
+      document.getElementById('temperature-icon').outerHTML = temperatureIcon;
+      document.getElementById('heart-icon').outerHTML = heartIcon;
+    }
+
+    // Initialize Blood Pressure Chart
+    function initializeBloodPressureChart(data) {
+      const ctx = document.getElementById('bp-chart').getContext('2d');
+      
+      // Sample data for the past 6 months
+      const months = ['Oct 2023', 'Nov 2023', 'Dec 2023', 'Jan 2024', 'Feb 2024', 'Mar 2024'];
+      
+      // Extract blood pressure data from the patient data
+      const bpHistory = data.patients.find(p => p.name === "Jessica Taylor").diagnosisHistory.bloodPressure;
+      
+      // Create datasets for systolic and diastolic
+      const systolicData = [120, 125, 160, 120, 150, 160];
+      const diastolicData = [80, 85, 90, 70, 75, 80];
+
+      const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: months,
+          datasets: [
+            {
+              label: 'Systolic',
+              data: systolicData,
+              borderColor: '#FF6B6B',
+              backgroundColor: 'rgba(255, 107, 107, 0.1)',
+              tension: 0.4,
+              pointRadius: 4,
+              pointBackgroundColor: '#FF6B6B'
+            },
+            {
+              label: 'Diastolic',
+              data: diastolicData,
+              borderColor: '#4E9BFF',
+              backgroundColor: 'rgba(78, 155, 255, 0.1)',
+              tension: 0.4,
+              pointRadius: 4,
+              pointBackgroundColor: '#4E9BFF'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: false,
+              min: 60,
+              max: 180,
+              grid: {
+                color: 'rgba(0, 0, 0, 0.05)'
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Populate diagnostic list
+    function populateDiagnosticList(diagnosticList) {
+      const tableBody = document.getElementById('diagnostic-list');
+      tableBody.innerHTML = '';
+      
+      diagnosticList.forEach(diagnosis => {
+        const row = document.createElement('tr');
+        
+        const problemCell = document.createElement('td');
+        problemCell.textContent = diagnosis.problem;
+        
+        const descriptionCell = document.createElement('td');
+        descriptionCell.textContent = diagnosis.description;
+        
+        const statusCell = document.createElement('td');
+        const statusBadge = document.createElement('span');
+        statusBadge.className = `status-badge ${diagnosis.status.toLowerCase().replace(/ /g, '-')}`;
+        statusBadge.textContent = diagnosis.status;
+        statusCell.appendChild(statusBadge);
+        
+        row.appendChild(problemCell);
+        row.appendChild(descriptionCell);
+        row.appendChild(statusCell);
+        
+        tableBody.appendChild(row);
+      });
+    }
+
+    // Populate patient list
+    function populatePatientList(patients) {
+      const patientList = document.getElementById('patient-list');
+      patientList.innerHTML = '';
+      
+      patients.forEach((patient, index) => {
+        const listItem = document.createElement('li');
+        listItem.className = 'patient-item';
+        if (patient.name === 'Jessica Taylor') {
+          listItem.classList.add('active');
+        }
+        
+        listItem.innerHTML = `
+          <img src="${patient.profilePicture || '/api/placeholder/40/40'}" alt="${patient.name}" class="patient-avatar">
+          <div class="patient-info">
+            <div class="patient-name">${patient.name}</div>
+            <div class="patient-details">${patient.gender}, ${patient.age}</div>
+          </div>
+          <div class="patient-actions">
+            <i class="fas fa-ellipsis-h"></i>
+          </div>
+        `;
+        
+        // Add click event to select patient
+        listItem.addEventListener('click', () => {
+          // Remove active class from all patient items
+          document.querySelectorAll('.patient-item').forEach(item => {
+            item.classList.remove('active');
+          });
+          
+          // Add active class to clicked patient
+          listItem.classList.add('active');
+          
+          // Update patient profile with selected patient data
+          updatePatientProfile(patient);
+        });
+        
+        patientList.appendChild(listItem);
+      });
+    }
+
+    // Update patient profile with selected patient data
+    function updatePatientProfile(patient) {
+      // Update profile avatar and name
+      document.getElementById('selected-patient-avatar').src = patient.profilePicture || '/api/placeholder/120/120';
+      document.getElementById('selected-patient-name').textContent = patient.name;
+      
+      // Update personal information
+      document.getElementById('patient-dob').textContent = patient.dateOfBirth;
+      document.getElementById('patient-gender').textContent = patient.gender;
+      document.getElementById('patient-phone').textContent = patient.phoneNumber;
+      document.getElementById('patient-emergency').textContent = patient.emergencyContact;
+      document.getElementById('patient-insurance').textContent = patient.insurance;
+      
+      // Update diagnostic list
+      populateDiagnosticList(patient.diagnosticList);
+      
+      // Update vital signs
+      document.getElementById('respiratory-rate').textContent = patient.respiratoryRate || '20 bpm';
+      document.getElementById('temperature').textContent = patient.temperature || '98.6°F';
+      document.getElementById('heart-rate').textContent = patient.heartRate || '78 bpm';
+      
+      // Update blood pressure values
+      if (patient.diagnosisHistory && patient.diagnosisHistory.bloodPressure) {
+        const bp = patient.diagnosisHistory.bloodPressure;
+        document.getElementById('systolic-value').textContent = bp.systolic || '160';
+        document.getElementById('diastolic-value').textContent = bp.diastolic || '78';
+      }
+    }
+
+    // Initialize the application
+    async function initApp() {
+      // Set vital signs icons
+      setVitalIcons();
+      
+      // Fetch patient data
+      const data = await fetchPatientData();
+      
+      if (data) {
+        // Populate patient list
+        populatePatientList(data.patients);
+        
+        // Find Jessica Taylor in the patient list
+        const jessicaTaylor = data.patients.find(patient => patient.name === 'Jessica Taylor');
+        
+        if (jessicaTaylor) {
+          // Update patient profile with Jessica Taylor's data
+          updatePatientProfile(jessicaTaylor);
+          
+          // Initialize blood pressure chart with Jessica's data
+          initializeBloodPressureChart(data);
+        }
+      }
+    }
+
+    // Run the application when DOM is fully loaded
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>
