@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tech.Care - Healthcare Dashboard</title>
-  <script src="script.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/3.9.1/chart.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="styles.css">
@@ -47,7 +46,7 @@
       <img src="/api/placeholder/40/40" alt="Doctor Avatar" class="user-avatar" id="doctor-avatar">
       <div class="user-info">
         <span class="user-name" id="doctor-name">Dr. Jose Simmons</span>
-        <span class="user-role">General Practitioner</span>
+        <span class="user-role" id="doctor-role">General Practitioner</span>
       </div>
       <i class="fas fa-cog"></i>
     </div>
@@ -61,6 +60,9 @@
       <div class="search-bar">
         <i class="fas fa-search search-icon"></i>
         <input type="text" placeholder="Search patients" id="patient-search">
+      </div>
+      <div class="loading-indicator" id="loading-patients">
+        <i class="fas fa-spinner fa-spin"></i> Loading patients...
       </div>
       <ul class="patient-list" id="patient-list">
         <!-- Patient list will be populated by JavaScript -->
@@ -79,25 +81,29 @@
                 <div class="legend-item">
                   <div class="legend-color" style="background-color: #FF6B6B;"></div>
                   <span>Systolic</span>
-                  <span class="bp-value" id="systolic-value">160</span>
+                  <span class="bp-value" id="systolic-value">--</span>
                   <span class="bp-status" id="systolic-status">
                     <i class="fas fa-arrow-up" style="color: #FF6B6B;"></i>
-                    <span>Higher than Average</span>
+                    <span>--</span>
                   </span>
                 </div>
                 <div class="legend-item">
                   <div class="legend-color" style="background-color: #4E9BFF;"></div>
                   <span>Diastolic</span>
-                  <span class="bp-value" id="diastolic-value">78</span>
+                  <span class="bp-value" id="diastolic-value">--</span>
                   <span class="bp-status" id="diastolic-status">
                     <i class="fas fa-arrow-down" style="color: #4E9BFF;"></i>
-                    <span>Lower than Average</span>
+                    <span>--</span>
                   </span>
                 </div>
               </div>
             </div>
             <div class="time-selector">
-              <span>Last 6 months</span>
+              <select id="time-range">
+                <option value="6">Last 6 months</option>
+                <option value="9">Last 9 months</option>
+                <option value="12">Last 12 months</option>
+              </select>
               <i class="fas fa-chevron-down"></i>
             </div>
           </div>
@@ -106,30 +112,36 @@
           </div>
           <div class="vital-signs">
             <div class="vital-sign respiratory-rate">
-              <div class="vital-icon" id="lungs-icon"></div>
+              <div class="vital-icon">
+                <i class="fas fa-lungs"></i>
+              </div>
               <span class="vital-title">Respiratory Rate</span>
-              <span class="vital-value" id="respiratory-rate">20 bpm</span>
+              <span class="vital-value" id="respiratory-rate">-- bpm</span>
               <span class="vital-status">
                 <span class="status-indicator normal"></span>
-                <span>Normal</span>
+                <span id="respiratory-status">--</span>
               </span>
             </div>
             <div class="vital-sign temperature">
-              <div class="vital-icon" id="temperature-icon"></div>
+              <div class="vital-icon">
+                <i class="fas fa-thermometer-half"></i>
+              </div>
               <span class="vital-title">Temperature</span>
-              <span class="vital-value" id="temperature">98.6°F</span>
+              <span class="vital-value" id="temperature">--°F</span>
               <span class="vital-status">
                 <span class="status-indicator normal"></span>
-                <span>Normal</span>
+                <span id="temperature-status">--</span>
               </span>
             </div>
             <div class="vital-sign heart-rate">
-              <div class="vital-icon" id="heart-icon"></div>
+              <div class="vital-icon">
+                <i class="fas fa-heartbeat"></i>
+              </div>
               <span class="vital-title">Heart Rate</span>
-              <span class="vital-value" id="heart-rate">78 bpm</span>
+              <span class="vital-value" id="heart-rate">-- bpm</span>
               <span class="vital-status">
-                <span class="status-indicator lower-than-average"></span>
-                <span>Lower than Average</span>
+                <span class="status-indicator normal"></span>
+                <span id="heart-rate-status">--</span>
               </span>
             </div>
           </div>
@@ -138,6 +150,9 @@
         <!-- Diagnostic List -->
         <section class="section">
           <h3 class="section-header">Diagnostic List</h3>
+          <div class="loading-indicator" id="loading-diagnostics">
+            <i class="fas fa-spinner fa-spin"></i> Loading diagnostics...
+          </div>
           <table class="diagnostic-table">
             <thead>
               <tr>
@@ -156,7 +171,7 @@
       <div class="right-panel">
         <div class="patient-profile">
           <img src="/api/placeholder/120/120" alt="Patient Avatar" class="patient-profile-avatar" id="selected-patient-avatar">
-          <h2 class="patient-profile-name" id="selected-patient-name">Jessica Taylor</h2>
+          <h2 class="patient-profile-name" id="selected-patient-name">Select a patient</h2>
           <div class="patient-profile-info">
             <div class="info-item">
               <div class="info-icon">
@@ -164,7 +179,7 @@
               </div>
               <div class="info-content">
                 <div class="info-label">Date Of Birth</div>
-                <div class="info-value" id="patient-dob">August 23, 1996</div>
+                <div class="info-value" id="patient-dob">--</div>
               </div>
             </div>
             <div class="info-item">
@@ -173,7 +188,7 @@
               </div>
               <div class="info-content">
                 <div class="info-label">Gender</div>
-                <div class="info-value" id="patient-gender">Female</div>
+                <div class="info-value" id="patient-gender">--</div>
               </div>
             </div>
             <div class="info-item">
@@ -182,7 +197,7 @@
               </div>
               <div class="info-content">
                 <div class="info-label">Contact Info</div>
-                <div class="info-value" id="patient-phone">(415) 555-1234</div>
+                <div class="info-value" id="patient-phone">--</div>
               </div>
             </div>
             <div class="info-item">
@@ -191,7 +206,7 @@
               </div>
               <div class="info-content">
                 <div class="info-label">Emergency Contacts</div>
-                <div class="info-value" id="patient-emergency">(415) 555-5678</div>
+                <div class="info-value" id="patient-emergency">--</div>
               </div>
             </div>
             <div class="info-item">
@@ -200,50 +215,26 @@
               </div>
               <div class="info-content">
                 <div class="info-label">Insurance Provider</div>
-                <div class="info-value" id="patient-insurance">Sunrise Health Assurance</div>
+                <div class="info-value" id="patient-insurance">--</div>
               </div>
             </div>
           </div>
           <button class="show-all-btn">Show All Information</button>
           
           <h3 class="section-header" style="margin-top: 2rem; align-self: flex-start;">Lab Results</h3>
-          <div class="lab-results">
-            <div class="lab-result-item">
-              <span class="lab-result-name">Blood Tests</span>
-              <button class="download-btn">
-                <i class="fas fa-download"></i>
-              </button>
-            </div>
-            <div class="lab-result-item">
-              <span class="lab-result-name">CT Scans</span>
-              <button class="download-btn">
-                <i class="fas fa-download"></i>
-              </button>
-            </div>
-            <div class="lab-result-item">
-              <span class="lab-result-name">Radiology Reports</span>
-              <button class="download-btn">
-                <i class="fas fa-download"></i>
-              </button>
-            </div>
-            <div class="lab-result-item">
-              <span class="lab-result-name">X-Rays</span>
-              <button class="download-btn">
-                <i class="fas fa-download"></i>
-              </button>
-            </div>
-            <div class="lab-result-item">
-              <span class="lab-result-name">Urine Test</span>
-              <button class="download-btn">
-                <i class="fas fa-download"></i>
-              </button>
-            </div>
+          <div class="loading-indicator" id="loading-lab-results">
+            <i class="fas fa-spinner fa-spin"></i> Loading lab results...
+          </div>
+          <div class="lab-results" id="lab-results-container">
+            <!-- Lab results will be populated by JavaScript -->
           </div>
         </div>
       </div>
     </main>
   </div>
 
+  <!-- Scripts added at the end for better page loading performance -->
+  <script src="patientData.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
